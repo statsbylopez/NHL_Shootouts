@@ -1,6 +1,6 @@
 # NHL_Shootouts
 
-This file contains R code for an analysis of NHL shootouts by [Michael Lopez](statsbylopez.com) and [Michael Schuckers](http://statsportsconsulting.com/). The resulting paper was presented at the 2015 New England Symposium on Statistics in Sports. For link to those slides, click [here](www.slides.com). 
+This file contains R code for an analysis of NHL shootouts by [Mike Lopez](statsbylopez.com) and [Michael Schuckers](http://statsportsconsulting.com/). The resulting paper was presented at the 2015 New England Symposium on Statistics in Sports. For link to those slides, click [here](www.slides.com). 
 
 There are two sets of code, each of which links to public csv files to extract the data. 
 
@@ -20,4 +20,4 @@ The [individual level code](https://github.com/statsbylopez/NHL_Shootouts/blob/m
 
 If you are unfamiliar with R and would just like to access the data, team level data is found [here](https://docs.google.com/spreadsheets/d/1oXhcXE4N5MUqv9VifxTXvPjnfhwPGtZTZxvinzyn6OM/pub?output=csv), and shot level data is found [here](https://docs.google.com/spreadsheets/d/1SAByAftxLi8ozisTwERn-IOmHxmksWNqV1tAv2KJlYo/pub?output=csv). 
 
-Feel free to email ML at mlopez1@skidmore.edu with questions or comments. Enjoy!
+Feel free to email Mike at mlopez1@skidmore.edu with questions or comments. Enjoy!
