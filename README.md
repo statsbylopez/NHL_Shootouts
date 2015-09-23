@@ -4,7 +4,7 @@ This file contains Rcode for an analysis of NHL shootouts by Lopez and Schuckers
 
 There are two sets of code, each of which links to public csv files to extract the data. 
 
-The team level code provides our team level analysis. There are a few parts to the team level code.
+The [team level code](https://github.com/statsbylopez/NHL_Shootouts/blob/master/TeamCode.R) provides our team level analysis. There are a few parts to the team level code.
 
 1. Year-to-year variability in team shootout win percentage
 2. Does the team that shoots first win the shootout?
