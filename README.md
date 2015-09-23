@@ -1,6 +1,6 @@
 # NHL_Shootouts
 
-This file contains R code for an analysis of NHL shootouts by [Mike Lopez](http://www.statsbylopez.com) and [Michael Schuckers](http://statsportsconsulting.com/). The resulting paper was presented at the 2015 New England Symposium on Statistics in Sports. For link to those slides, click [here](www.slides.com). 
+This file contains R code for an analysis of NHL shootouts by [Mike Lopez](http://www.statsbylopez.com) and [Michael Schuckers](http://statsportsconsulting.com/). The resulting paper was presented at the 2015 New England Symposium on Statistics in Sports. For link to those slides, click [here](https://dl.dropboxusercontent.com/u/42748635/NESSIS.hockey/Slides.NESSIS.html). 
 
 There are two sets of code, each of which links to public csv files to extract the data. 
 
