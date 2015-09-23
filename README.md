@@ -17,3 +17,5 @@ The [individual level code](https://github.com/statsbylopez/NHL_Shootouts/blob/m
 3. A resampling strategy to try and better understand the decision making processes of NHL coaches
 4. Out of sample testing on shooter and goalie characteristics
 5. Estimation of shooter and goalie worth using past seasons as guidelines
+
+If you are unfamiliar with `R` and would just like to access the data, team level data is found [here](https://docs.google.com/spreadsheets/d/1oXhcXE4N5MUqv9VifxTXvPjnfhwPGtZTZxvinzyn6OM/pub?output=csv), and shot level data is found [here](https://docs.google.com/spreadsheets/d/1SAByAftxLi8ozisTwERn-IOmHxmksWNqV1tAv2KJlYo/pub?output=csv). 
