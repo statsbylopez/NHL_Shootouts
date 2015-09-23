@@ -8,6 +8,7 @@ require(extrafont)
 library(broom)
 library(dotwhisker)
 library(dplyr)
+library(RCurl)
 loadfonts()
 
 #Here's the theme for our graphs 
@@ -21,8 +22,6 @@ theme.Lopez<-theme(axis.text.x = element_text(size=rel(1.9)),
 
 
 #Get the data
-
-library(RCurl)
 x <- getURL("https://docs.google.com/spreadsheets/d/1oXhcXE4N5MUqv9VifxTXvPjnfhwPGtZTZxvinzyn6OM/pub?output=csv")
 so.dat <- read.csv(text = x)
 
