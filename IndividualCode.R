@@ -8,6 +8,7 @@ loadfonts()
 library(dplyr)
 library(broom)
 library(dotwhisker)
+library(RCurl)
 
 #Theme for plots
 theme.Lopez<-theme(axis.text.x = element_text(size=rel(1.6)),
@@ -17,7 +18,8 @@ theme.Lopez<-theme(axis.text.x = element_text(size=rel(1.6)),
                    plot.margin = unit(c(1,0.3,0.5,0), "cm"),legend.position = "none",
                    plot.title = element_text(vjust=2, size=rel(1.6)))
 
-nhl<-read.csv("/Users/mlopez1/Dropbox/NHL_SOs/SO_shooters.csv")
+y <- getURL("https://docs.google.com/spreadsheets/d/1SAByAftxLi8ozisTwERn-IOmHxmksWNqV1tAv2KJlYo/pub?output=csv")
+nhl <- read.csv(text = y)
 
 
 #Descriptive Statistics
