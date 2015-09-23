@@ -1,6 +1,6 @@
 # NHL_Shootouts
 
-This file contains Rcode for an analysis of NHL shootouts by Lopez and Schuckers. The paper was presented at the 2015 New England Symposium on Statistics in Sports. For link to those slides, clink [here](www.slides.com). 
+This file contains Rcode for an analysis of NHL shootouts by Lopez and Schuckers. The paper was presented at the 2015 New England Symposium on Statistics in Sports. For link to those slides, click [here](www.slides.com). 
 
 There are two sets of code, each of which links to public csv files to extract the data. 
 
