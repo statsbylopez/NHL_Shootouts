@@ -10,7 +10,7 @@ The [team level code](https://github.com/statsbylopez/NHL_Shootouts/blob/master/
 2. Does the team that shoots first win the shootout?
 3. How does visiting team win percentage look over time.
 
-The individual level code provides individual level analysis. There are many parts to the individual level code
+The [individual level code](https://github.com/statsbylopez/NHL_Shootouts/blob/master/IndividualCode.R) provides individual level analysis. There are many parts to the individual level code
 
 1. Descriptive statistics, including funnel plots for shooters and goalies
 2. Generalized linear models, and generalized linear mixed models, of goalie outcomes, along with coefficient plots.
