@@ -20,4 +20,4 @@ The [individual level code](https://github.com/statsbylopez/NHL_Shootouts/blob/m
 
 If you are unfamiliar with R and would just like to access the data, team level data is found [here](https://docs.google.com/spreadsheets/d/1oXhcXE4N5MUqv9VifxTXvPjnfhwPGtZTZxvinzyn6OM/pub?output=csv), and shot level data is found [here](https://docs.google.com/spreadsheets/d/1SAByAftxLi8ozisTwERn-IOmHxmksWNqV1tAv2KJlYo/pub?output=csv). 
 
-Feel free to leave comments, or email mlopez1@skidmore.edu
+Feel free to email ML at mlopez1@skidmore.edu with questions or comments. Enjoy!
