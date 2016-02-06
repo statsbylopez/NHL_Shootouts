@@ -9,6 +9,9 @@ library(dplyr)
 library(broom)
 library(dotwhisker)
 library(RCurl)
+require(mvtnorm)
+require(msm)
+require(MCMCpack)
 
 #Theme for plots
 theme.Lopez<-theme(axis.text.x = element_text(size=rel(1.6)),
@@ -473,3 +476,111 @@ mean((so.wins.good-so.wins.average)<=0)
 
 #So, a top goalie is worth about 1.15 of an extra shootout win on average, 
 #On a single season basis, it'd be difficult to tell that team from a league-average team
+
+
+
+
+
+#######
+#Bayesian Analysis
+#######
+
+set.seed(20142015)
+#set.seed(20122013)
+options(stringsAsFactors = FALSE)
+
+k=nrow(shootout)
+#k=1000
+y=shootout$Goal01[1:k]
+n1<-sum(y)                  		# Number of successes
+n0<-k-n1
+
+ngoalies=length(table(shootout$Goalie2[1:k]))
+g.names=names(table(shootout$Goalie2[1:k]))
+nshooter=length(table(shootout$Shooter2[1:k]))
+s.names=names(table(shootout$Shooter2[1:k]))
+nstatus=length(table(shootout$SOStatus[1:k]))
+st.names=names(table(shootout$SOStatus[1:k]))
+nteams=length(table(shootout$ShootingTm[1:k]))
+t.names=names(table(shootout$ShootingTm[1:k]))
+shootout$Rd=as.character(shootout$Rd)
+nrounds=length(table(shootout$Rd[1:k]))
+r.names=names(table(shootout$Rd[1:k]))
+shootout$PosD=as.numeric(shootout$Pos=="D")
+
+X=cbind(rep(1,k),model.matrix(~shootout$Goalie2[1:k]-1),
+        model.matrix(~shootout$Shooter2[1:k]-1),
+        model.matrix(~shootout$SOStatus[1:k]-1),
+        model.matrix(~shootout$ShootingTm[1:k]-1),
+        model.matrix(~shootout$PosD[1:k]-1))
+
+nparam=ncol(X)
+
+ncovars=nparam-ngoalies-nshooter-1
+#prior mean and variance parameters for beta
+
+beta0<-c(-0.25, rep(0,nparam-1))    	
+#a0=10
+a0=5
+b0=nparam*a0
+#Note Gelman, Bayesian Analysis (2006) 
+# this is equivalent to inv chisq with df 2*a0 and 
+# and scale b0/a0 and we assume sum of squared error for
+# beta's to be roughly unity then b0/a0 should be approximately nparam
+
+#initialize tau2 prior variance of regression coefficients
+tau20=rinvgamma(1,a0,b0)
+vbeta0<-tau20*diag(nparam)
+
+nburn=1000
+nsave=1000
+thin=10
+nsim=nburn+nsave*thin+1
+
+z<-rep(0,k)				# Latent Normal Variable
+Betamat<-matrix(0,nrow=nsave,ncol=(nparam)+4) 
+
+#starting values for tau2
+tau2 = tau20
+
+#generate starting beta
+Beta=rnorm(nparam,beta0,0.1)
+Betamat[1,]=c(Beta,rep(tau2,4))
+
+
+
+j=1
+for (i in 2:nsim) {
+if (i%%20==0) print(i)
+ # Draw Latent Variable, z, from its full conditional, given y
+  muz<-X%*%Beta			# Update Mean of Z
+  z[y==0]<-rtnorm(n0,muz[y==0],1,-Inf,0)
+#z[y==0]=rtmvnorm(1,mean=muz[y==0],1,lower=-Inf,upper=0)
+  z[y==1]<-rtnorm(n1,muz[y==1],1,0,Inf)
+
+  
+ # Beta from of posterior of Beta|Z, Beta0
+vbeta <- solve(crossprod(X,X)+1/tau2*diag(nparam))
+mbeta <- vbeta%*%(crossprod(X,z)+1/tau2*beta0)
+Beta=c(rmvnorm(1,mbeta,vbeta))
+  
+#generate tau2 | beta
+#print(sum((Beta-beta0)^2))
+tau2.intercept=rinvgamma(1,a0+1.5,b0+0.5*(Beta[1]-beta0[1])^2)
+tau2.goalies=rinvgamma(1,a0+1+ngoalies/2,b0+0.5*sum((Beta[1:ngoalies+1]-beta0[1:ngoalies+1])^2))
+tau2.shooters=rinvgamma(1,a0+1+nshooter/2,b0+0.5*sum((Beta[(ngoalies+2):(ngoalies+nshooter+1)]-beta0[(ngoalies+2):(ngoalies+nshooter+1)])^2))
+tau2.covars=rinvgamma(1,a0+1+nstatus+nteams+nrounds,b0+0.5*sum((Beta[(ngoalies+nshooter+2):nparam])-beta0[(ngoalies+nshooter+2):nparam])^2)
+tau2.out=c(tau2.intercept,tau2.goalies,tau2.shooters,tau2.covars)
+tau2=c(tau2.intercept,rep(tau2.goalies,ngoalies),rep(tau2.shooters,nshooter),rep(tau2.covars,ncovars))
+
+
+if(i>nburn & (i-nburn)%%thin==0 ) {Betamat[j,]<-c(Beta,tau2.out);j=j+1}
+ 
+
+}
+
+colnames(Betamat)=c("Interc",g.names,s.names,st.names,t.names,"PosD","tau2.interc","tau2.g","tau2.s","tau2.cov")
+save.image("shootout_hier_2016_a.RData")
+print("voila")
+
+
