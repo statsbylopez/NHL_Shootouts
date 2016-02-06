@@ -1,20 +1,23 @@
 rm(list = ls())
 require(mosaic)
 require(knitr)
-library(lme4)
-library(ggplot2); 
+require(lme4)
+require(ggplot2); 
 require(extrafont);
 loadfonts()
-library(dplyr)
-library(broom)
-library(dotwhisker)
-library(RCurl)
+require(dplyr)
+require(broom)
+require(dotwhisker)
+require(RCurl)
 require(mvtnorm)
 require(msm)
 require(MCMCpack)
 
-#Theme for plots
-theme.Lopez<-theme(axis.text.x = element_text(size=rel(1.6)),
+
+###################################
+# Theme for plots
+###################################
+theme.plots<-theme(axis.text.x = element_text(size=rel(1.6)),
                    axis.text.y = element_text(size=rel(1.6)),
                    axis.title.x = element_text(size=rel(1.6), vjust=-1),
                    axis.title.y = element_text(size=rel(1.6)),
@@ -25,7 +28,10 @@ y <- getURL("https://docs.google.com/spreadsheets/d/1SAByAftxLi8ozisTwERn-IOmHxm
 nhl <- read.csv(text = y)
 
 
-#Descriptive Statistics
+
+###################################
+# Descriptive stats
+###################################
 
 nrow(nhl)
 table(nhl$Rd,nhl$Goal01)
@@ -56,6 +62,11 @@ temp<-filter(nhl,Shooter2=="F.NIELSEN"|Shooter2=="J.TOEWS"|Shooter2=="T.OSHIE"|S
 table(temp$Rd)
 
 
+
+###################################
+# Reduced data frame, used later for regression models
+###################################
+
 #Here, we create a data set using only the shooters that took at least five attempts in each round
 SS<-as.data.frame.matrix(table(nhl$Shooter2,nhl$Rd))
 SS<-SS[,c(1:3)]
@@ -70,7 +81,11 @@ head(nhl.new)
 nrow(nhl.new)
 
 
-#Funnel Plots, goalies
+
+###################################
+# Funnel plots, goalies
+###################################
+
 p<-mean(nhl$Goal01)
 mu<-1-p
 attempts<-1:325
@@ -91,7 +106,7 @@ tab<-filter(tab,size>=10)
 
 p <- ggplot(data = tab, aes(x = size, y = save_rate)) +
   geom_point(aes(text = paste("Player:", Goalie2)), size = 4,
-             position = position_jitter(width = .015,height=0.015)) +theme_bw()+theme.Lopez+
+             position = position_jitter(width = .015,height=0.015)) +theme_bw()+theme.plots+
   scale_y_continuous("",breaks=c(0,0.25,0.5,0.75,1),labels=c("0%","25%","50%","75%","100%"),lim=c(0.35,1.01))+
   scale_x_continuous("Attempts")+ggtitle("Shootout save percentage, goalies")+
   geom_line(data=lin,aes(x=attempts,y=UL),col="red",lty=5)+
@@ -106,7 +121,12 @@ p <- ggplot(data = tab, aes(x = size, y = save_rate)) +
 p
 
 
-#Funnel plots, shooters
+
+###################################
+# Funnel plots, shooters
+###################################
+
+
 p<-mean(nhl$Goal01)
 mu<-p
 attempts<-1:100
@@ -124,7 +144,7 @@ tab<-nhl %>% group_by(Shooter2) %>% summarize(goal_rate = mean(Goal01),size= len
 
 p <- ggplot(data = tab, aes(x = size, y = goal_rate)) +
   geom_point(aes(text = paste("Player:", Shooter2)), size = 4,
-             position = position_jitter(width = .015,height=0.015)) +theme_bw()+theme.Lopez+
+             position = position_jitter(width = .015,height=0.015)) +theme_bw()+theme.plots+
   scale_y_continuous("",labels=c("0%","25%","50%","75%","100%"))+
   scale_x_continuous("Attempts")+ggtitle("Shootout goal percentage, shooters")+
   geom_line(data=lin,aes(x=attempts,y=UL),col="red",lty=2)+
@@ -139,7 +159,12 @@ p <- ggplot(data = tab, aes(x = size, y = goal_rate)) +
 p
 
 
-#Here are a few of the regression models we consider. These include mixed (M1 - M4) and fixed (M5) effects. 
+
+###################################
+# Mixed models 
+###################################
+
+
 
 M1<-"Goal01~SOStatus+ShootingTm+Defense+(1|Goalie2)+(1|Shooter2)"
 M2<-"Goal01~Rd+ShootingTm+Defense+(1|Goalie2)+(1|Shooter2)"
@@ -189,7 +214,11 @@ AIC(m1); AIC(m2); AIC(m3); AIC(m4); AIC(m5)
 BIC(m1); BIC(m2); BIC(m3); BIC(m4); AIC(m5)
 
 
-#Plot estimates using coefficient plots: Use m5, m1, m1p in that order
+
+###################################
+# Coefficient plots
+###################################
+
 
 m1_df <- coef(summary(m1)) %>% 
   data.frame() %>% 
@@ -213,99 +242,20 @@ ordered_vars <- c("SOStatusLoss imminent", "SOStatusWin imminent", "ShootingTmVi
 
 dwplot(filter(m,model!="GLMM (full)",model!="GLMM (reduced)")) +geom_vline(xintercept = 0,color="gray")+ggtitle("Coefficient estimates (95% CI's)")+ 
   scale_y_discrete(labels=c("Visiting Team","Loss Imminent","Win Imminent"))+
-  xlab("log-odds, Goal")+theme.Lopez+theme_bw()+
+  xlab("log-odds, Goal")+theme.plots+theme_bw()+
   scale_colour_grey( start=0.6,end=.6,name = "Model Type")
-
-dwplot(filter(m,model!="GLMM (reduced)")) +geom_vline(xintercept = 0,color="gray")+ggtitle("Coefficient estimates (95% CI's)")+ 
-  scale_y_discrete(labels=c("Loss Imminent","Visiting Team","Win Imminent"))+
-  xlab("log-odds, Goal")+theme.Lopez+theme_bw()+
-  scale_colour_grey( start=.6,end=.3,name = "Model Type")
 
 dwplot(m) +geom_vline(xintercept = 0,color="gray")+ggtitle("Coefficient estimates (95% CI's)")+ 
   scale_y_discrete(labels=c("Loss Imminent","Visiting Team","Win Imminent"))+
-  xlab("log-odds, Goal")+theme.Lopez+theme_bw()+
+  xlab("log-odds, Goal")+theme.plots+theme_bw()+
   scale_colour_grey( start=.8,end=0,name = "Model Type")
 
 
-### Random effects for shooters
-randoms<-ranef(m1, condVar = TRUE)$Shooter2
-qq <- attr(ranef(m1, condVar = TRUE)[[1]], "postVar")
-rand.interc<-randoms[,1]
-df<-data.frame(Intercepts=randoms[,1],
-               sd.interc=2*sqrt(qq[,,1:length(qq)]),
-               lev.names=rownames(randoms))
-df$lev.names<-factor(df$lev.names,levels=df$lev.names[order(df$Intercepts)])
-df<-df[order(df$Intercepts),]
-np<-nrow(df)
-df<-df[c(1:5,(np-4):np),]
-p1<- ggplot(df,aes(lev.names,Intercepts,shape=lev.names)) + geom_hline(yintercept=0) +
-  geom_errorbar(aes(ymin=Intercepts-sd.interc, ymax=Intercepts+sd.interc), 
-                width=0,color="black") + geom_point(aes(size=2),pch=16)  + 
-  scale_x_discrete("")+ 
-  guides(size=FALSE,shape=FALSE) +theme_bw() + xlab("Levels") + ylab("") + coord_flip()+
-  scale_y_continuous("Intercept (log odds scale)",lim=c(-0.65,0.65))+ggtitle("Shooter Random Effects (95% CI's)")
-print(p1)
 
-###Random effects for goalies
-randoms<-ranef(m1, condVar = TRUE)$Goalie2
-qq <- attr(ranef(m1, condVar = TRUE)[[2]], "postVar")
-rand.interc<-randoms[,1]
-df<-data.frame(Intercepts=randoms[,1],
-               sd.interc=1.96*sqrt(qq[,,1:length(qq)]),
-               lev.names=rownames(randoms))
-df$lev.names<-factor(df$lev.names,levels=df$lev.names[order(df$Intercepts)])
-df<-df[order(-df$Intercepts),]
-np<-nrow(df)
-df<-df[c(1:5,(np-4):np),]
+###################################
+# Resampling to visualize coaching strategy
+###################################
 
-df$lev.names <-factor(df$lev.names, levels=df[order(-df$Intercepts),"lev.names"])
-
-p2<- ggplot(df,aes(lev.names,Intercepts)) + geom_hline(yintercept=0) +
-  geom_errorbar(aes(ymin=Intercepts-sd.interc, ymax=Intercepts+sd.interc), 
-                width=0,color="black") + geom_point(aes(size=2),pch=16) + 
-  scale_x_discrete("")+
-  guides(size=FALSE,shape=FALSE) +theme_bw() + xlab("Levels") + ylab("") + coord_flip()+
-  scale_y_continuous("Intercept (log odds scale)",lim=c(-0.65,0.65))+ggtitle("Goalie Random Effects (95% CI's)")
-print(p2)
-
-
-
-#Out of sample method- predicting the 2015 season
-#Predictions judged using Log Loss function (such that lower is better)
-
-train.set<-filter(nhl,Year!="20142015")
-test.set<-filter(nhl,Year=="20142015")
-
-#Mixed models. We want to check if our incusion of random intercepts improves accuracy
-
-m.both<-glmer(Goal01~(1|Goalie2)+(1|Shooter2),nhl,verbose=FALSE,family=binomial())
-m.goalie<-glmer(Goal01~(1|Goalie2),nhl,verbose=FALSE,family=binomial())
-m.shooter<-glmer(Goal01~(1|Shooter2),nhl,verbose=FALSE,family=binomial())
-
-test.set$new.both<-!(test.set$Shooter2%in%train.set$Shooter2|test.set$Goalie2%in%train.set$Goalie2)
-test.set$new.goalie<-!(test.set$Goalie2%in%train.set$Goalie2)
-test.set$new.shooter<-!(test.set$Shooter2%in%train.set$Shooter2)
-
-#The naive method would use past goal percent as the future goal percent
-phat.1415<-mean(train.set$Goal01)
-
-test.set$phat1<-predict(m.both, test.set, allow.new.levels=TRUE,type="response")
-test.set$phat2<-predict(m.goalie, test.set, allow.new.levels=TRUE,type="response")
-test.set$phat3<-predict(m.shooter, test.set, allow.new.levels=TRUE,type="response")
-test.set$phat4<-phat.1415
-
-#Calculate log-loss for our models on the test data (the 2014-15 season)
-LL.both<--sum(test.set$Goal01*log(test.set$phat1)+(1-test.set$Goal01)*log(1-test.set$phat1))/nrow(test.set)
-LL.goalie<--sum(test.set$Goal01*log(test.set$phat2)+(1-test.set$Goal01)*log(1-test.set$phat2))/nrow(test.set)
-LL.shooter<--sum(test.set$Goal01*log(test.set$phat2)+(1-test.set$Goal01)*log(1-test.set$phat3))/nrow(test.set)
-LL.neither<--sum(test.set$Goal01*log(test.set$phat4)+(1-test.set$Goal01)*log(1-test.set$phat4))/nrow(test.set)
-
-data.frame(LL.both,LL.goalie,LL.shooter,LL.neither)
-#Again, we are looking for lower LL scores. Inclusion of goalie & shooter intercepts appears optimal
-
-
-
-#Let's resample to visualize coaching strategy
 
 set.seed(999)
 par(mfrow=c(1,2))
@@ -361,46 +311,14 @@ for(i in 1:nrow(temp)){
   temp.nhl<-filter(nhl.order,Shooter2==temp[i,1])
   points((nrow(temp.nhl)+x[i]*10),(finalp[i]+x[i]),pch=16)}
 
-#And what about the group in the lower left? Shooter specific trends
-
-par(mfrow=c(1,1))
-names<-c("D.PENNER","D.SEDIN","M.HAVLAT","M.RYDER","T.PLEKANEC","T.PYATT")
-colors<-c("blue","black","red","green","brown","grey")
-df.temp<-data.frame(Shooter2=names,colors=colors)
-par(mar=c(3,4,3,1))
-nhl.order<-nhl[order(nhl$Shooter2,nhl$Year,nhl$GameNumb),]
-nhl.order<-filter(nhl.order,Shooter2%in%names)
-nhl.order<-inner_join(nhl.order,df.temp)
-temp<-data.frame(table(nhl.order$Shooter2))
-temp<-temp[temp$Freq>5,]
-nhl.order<-filter(nhl.order,Shooter2%in%temp$Var1)
-plot(0,0,xlim=c(0,40),ylim=c(-0.02,1),col="white",xlab="Shootout attempt",
-     ylab="Success Rate",yaxt='n',main="Observed Tracks")
-axis(2,c("0%","20%","40%","60%","80%","100%"),las=1,at=c(0,0.2,0.4,0.6,0.8,1))
-
-x<-rnorm(nrow(temp),0,0.02)
-for(i in 1:nrow(temp)){
-  temp.nhl<-filter(nhl.order,Shooter2==temp[i,1])
-  percent.p<-cumsum(temp.nhl$Goal01)/1:nrow(temp.nhl)
-  points((1:nrow(temp.nhl)+x[i]*10),(percent.p+x[i]),type="l",col=temp.nhl$colors,lwd=2)}
-for(i in 1:nrow(temp)){
-  temp.nhl<-filter(nhl.order,Shooter2==temp[i,1])
-  percent.p<-cumsum(temp.nhl$Goal01)/1:nrow(temp.nhl)
-  cols<-ifelse(max(temp.nhl$Year)=="20142015","red","black")
-  points((nrow(temp.nhl)+x[i]*10),(percent.p[nrow(temp.nhl)]+x[i]),pch=16,col=temp.nhl$colors,cex=1.5)
-  #text((nrow(temp.nhl)+x[i]*10),(percent.p[nrow(temp.nhl)]+x[i]),temp.nhl$Shooter2)
-}
-tab<-nhl.order %>% group_by(Shooter2) %>% summarize(S.Ave=mean(Goal01),S.n=length(Goal01))
-tab$graph<-tab$S.Ave+c(0.04,0.04,-0.06,-0.02,-0.02,-0.04)
-tab<-inner_join(tab,df.temp)
-text(tab$S.n,tab$graph,tab$Shooter2,col=c("cyan","black","deeppink","blue","green","red"))
 
 
 
+###################################
+# Value of best shooters and goalies
+###################################
 
 
-#Finally what does this all mean?
-#Here, we look at value of best shooters and best goalies
 set.seed(20142015)
 n.sim<-100000
 
@@ -481,9 +399,9 @@ mean((so.wins.good-so.wins.average)<=0)
 
 
 
-#######
-#Bayesian Analysis
-#######
+###################################
+# Bayesian Analysis
+###################################
 
 set.seed(20142015)
 #set.seed(20122013)
