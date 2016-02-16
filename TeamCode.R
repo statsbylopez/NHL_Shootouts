@@ -1,22 +1,19 @@
 rm(list = ls())
 require(mosaic)
 require(knitr)
-require(lme4)
+library(lme4)
 require(XML)
-require(ggplot2) 
+library(ggplot2) 
 require(extrafont)
-require(broom)
-require(dotwhisker)
-require(dplyr)
-require(RCurl)
+library(broom)
+library(dotwhisker)
+library(dplyr)
+library(RCurl)
 loadfonts()
 
-######################
-#Theme for the plots
-######################
+#Here's the theme for our graphs 
 
-
-theme.plots<-theme(axis.text.x = element_text(size=rel(1.9)),
+theme.plot<-theme(axis.text.x = element_text(size=rel(1.9)),
                    axis.text.y = element_text(size=rel(1.9)),
                    axis.title.x = element_text(size=rel(1.9), vjust=-1),
                    axis.title.y = element_text(size=rel(1.9)),
@@ -29,20 +26,11 @@ x <- getURL("https://docs.google.com/spreadsheets/d/1oXhcXE4N5MUqv9VifxTXvPjnfhw
 so.dat <- read.csv(text = x)
 
 
-######################
-#Descriptive statistics
-######################
-
-
 #Do visitors win more often?
 mean(so.dat$VisGoals>so.dat$HomeGoals)
 
 
-
-######################
-#Year to Year consistency
-######################
-
+#Year to year consistency
 team.list<-unique(so.dat$Visitor)
 df<-matrix(nrow=9*length(unique(team.list)),ncol=6)
 colnames(df)<-c("Year1","Year2","Seasons","Team","nYear1","nYear2")
@@ -66,16 +54,10 @@ df1$nYear1<-as.numeric(as.character(df1$nYear1))
 df1$nYear2<-as.numeric(as.character(df1$nYear2))
 
 
-p<-ggplot(df1, aes(x=Year1, y=Year2))+ stat_smooth() + geom_point(position="jitter",aes(size=1.5))+theme_bw()+theme.plots+
+p<-ggplot(df1, aes(x=Year1, y=Year2))+ stat_smooth() + geom_point(position="jitter",aes(size=1.5))+theme_bw()+theme.plot+
   scale_x_continuous(labels=c("0%","25%","50%","75%","100%"),"Year 1 win %")+
   scale_y_continuous(labels=c("0%","25%","50%","75%","100%"),"Year 2 win %")+ggtitle("Year to Year SO win percentages (team)")
 p
-
-
-######################
-#Teams with best shooters
-######################
-
 
 #Look at performance of teams with best shooters (Nielsen, Oshie, Toews between 08 and 15)
 teams<-c("St. Louis Blues","Chicago Blackhawks","New York Islanders")
@@ -92,11 +74,7 @@ cor(df1$Year2,df1$nYear2)
 cor(df1$Year1,df1$nYear2)
 
 
-
-######################
-#Visiting team win %
-######################
-
+#Track visitors win percentage over time
 so.dat$Vis.Win<-so.dat$VisGoals>so.dat$HomeGoals
 tab.VisWin<-tab<-so.dat %>% group_by(Year) %>% summarize(WinRate= mean(Vis.Win),size= length(Vis.Win))
 tab.VisWin$SE<-sqrt(tab.VisWin$WinRate*(1-tab.VisWin$WinRate)/tab.VisWin$size)
@@ -106,7 +84,7 @@ p<-ggplot(tab.VisWin, aes(x=Year, y=WinRate)) +
   geom_line() +
   geom_point(size=3, shape=16) +
   scale_y_continuous("",labels=c("40%","50%","60%","70%"))+
-  theme_bw()+theme.plots+
+  theme_bw()+theme.plot+
   ggtitle("Visiting team SO win percentage")+geom_hline(aes(yintercept=0.5),col="red",lty=2)+
   scale_x_continuous("Season",breaks=2006:2015,labels=c("2005-06","2006-07","2007-08","2008-09",
                                                         "2009-10","2010-11","2011-12","2012-13",
@@ -116,10 +94,8 @@ p
 
 
 
-######################
-#Order choice: shoot first or second?
-######################
-
+#What about the team that shoots first? 
+#We need game level variables (if we were to use original data)
 
 y <- getURL("https://docs.google.com/spreadsheets/d/1SAByAftxLi8ozisTwERn-IOmHxmksWNqV1tAv2KJlYo/pub?output=csv")
 nhl <- read.csv(text = y)
